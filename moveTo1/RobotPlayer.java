@@ -2,6 +2,7 @@ package moveTo1;
 
 
 import battlecode.common.*;
+
 import java.util.*;
 
 public class RobotPlayer {
@@ -44,7 +45,7 @@ public class RobotPlayer {
 				}else if (rc.getType()==RobotType.SOLDIER){
 					rX = rc.getLocation().x;
 					rY = rc.getLocation().y;
-					if(rType <2)
+					if(rType <3)
 					{
 						pastureBot();
 					}
@@ -69,16 +70,19 @@ public class RobotPlayer {
 		{
 			if(rAction.equals("none"))
 			{
-				if(rType == 0)
+				
+				if(rType == 2)
 				{
-					rDestinationX = width - 1;
-					rDestinationY = height - 1;
+					rDestinationX = 1;
+					rDestinationY = 1;
 				}
 				else if(rType == 1)
 				{
-					rDestinationX = 1;
-					rDestinationY = height - 1;
+					rDestinationX = width - 1;
+					rDestinationY = 1;
 				}
+				System.out.println("type:" + rType);
+				System.out.println("rdx: " +  rDestinationX + " rdy: " + rDestinationY);
 				rAction = "moving";
 			}
 			if(rAction.equals("moving"))
@@ -90,21 +94,69 @@ public class RobotPlayer {
 	
 	public static void move(boolean mFlag) throws GameActionException 
 	{
+		if(rDestinationX == rX && rDestinationY == rY)
+		{
+			rAction = "makePasture";
+			return;
+		}
+		
+		
 		Direction moveDirection = dirs[0];
 		
-		//double dx = 
+		double dx = ((double)rDestinationX) - ((double)rX);
+		double dy = ((double)rDestinationY) - ((double)rY);
 		
+		double angle = Math.atan(dy/dx);
+		if(dx<0.0)
+		{
+			angle += Math.PI;
+		}
 		
-		if (rc.canMove(moveDirection)) {
-			if(mFlag)
+		int cur_direction =(int) Math.round(angle * 4.0 / Math.PI) + 2;
+		if(cur_direction<0)
+		{
+			cur_direction += 8;
+		}
+		else if(cur_direction>7)
+		{
+			cur_direction -= 8;
+		}
+		
+		for(int i=1;i<9;i++)
+		{
+			int test_direction = i;
+			if(test_direction%2 == 1)
 			{
-				rc.move(moveDirection);
+				test_direction = -test_direction;
 			}
-			else
+			test_direction = test_direction/2 + cur_direction;
+			if(test_direction<0)
 			{
-				rc.sneak(moveDirection);
+				test_direction += 8;
+			}
+			else if(test_direction>7)
+			{
+				test_direction -= 8;
+			}
+			
+			moveDirection = dirs[test_direction];
+			
+			if (rc.canMove(moveDirection)) {
+				if(mFlag)
+				{
+					rc.move(moveDirection);
+				}
+				else
+				{
+					rc.sneak(moveDirection);
+				}
+				System.out.println("rx: " + rX + " ry: " + rY);
+				return;
 			}
 		}
+		
+		
+		
 	}
 	
 }
