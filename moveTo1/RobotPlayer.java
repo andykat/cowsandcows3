@@ -10,6 +10,8 @@ public class RobotPlayer {
 	
 	public static Direction[] dirs = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST
 		,Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
+	public static int[] int_dirs_X = {0,1,1,1,0,-1,-1,-1};
+	public static int[] int_dirs_Y = {-1,-1,0,1,1,1,0,-1};
 	static Random rand;
 	
 	public static int height;
@@ -18,14 +20,14 @@ public class RobotPlayer {
 	public static int rType;
 	public static int rX;
 	public static int rY;
-	public static int[][] rVisited;
+	public static boolean[][] rVisited;
 	public static String rAction;
 	public static int rDestinationX;
 	public static int rDestinationY;
 	
 	public static void run(RobotController myRC) {
 		rc = myRC;
-		rand = new Random();
+		rand = new Random(myRC.getRobot().getID());
 		
 		
 		width = rc.getMapWidth();
@@ -34,7 +36,14 @@ public class RobotPlayer {
 		if(rc.getType()==RobotType.SOLDIER)
 		{
 			rType = rc.senseRobotCount()%10;
-			rVisited = new int[width][height];
+			rVisited = new boolean[width][height];
+			for(int i=0;i<width;i++)
+			{
+				for(int j=0;j<height;j++)
+				{
+					rVisited[i][j] = false;
+				}
+			}
 			rAction = "none";
 		}
 
@@ -45,7 +54,7 @@ public class RobotPlayer {
 				}else if (rc.getType()==RobotType.SOLDIER){
 					rX = rc.getLocation().x;
 					rY = rc.getLocation().y;
-					if(rType <3)
+					if(rType <100)
 					{
 						pastureBot();
 					}
@@ -70,8 +79,9 @@ public class RobotPlayer {
 		{
 			if(rAction.equals("none"))
 			{
-				
-				if(rType == 2)
+				rDestinationX = rand.nextInt(width);
+				rDestinationY = rand.nextInt(height);
+				/*if(rType == 2)
 				{
 					rDestinationX = 1;
 					rDestinationY = 1;
@@ -80,9 +90,9 @@ public class RobotPlayer {
 				{
 					rDestinationX = width - 1;
 					rDestinationY = 1;
-				}
-				System.out.println("type:" + rType);
-				System.out.println("rdx: " +  rDestinationX + " rdy: " + rDestinationY);
+				}*/
+				//System.out.println("type:" + rType);
+				//System.out.println("rdx: " +  rDestinationX + " rdy: " + rDestinationY);
 				rAction = "moving";
 			}
 			if(rAction.equals("moving"))
@@ -96,6 +106,13 @@ public class RobotPlayer {
 	{
 		if(rDestinationX == rX && rDestinationY == rY)
 		{
+			for(int i=0;i<width;i++)
+			{
+				for(int j=0;j<height;j++)
+				{
+					rVisited[i][j] = false;
+				}
+			}
 			rAction = "makePasture";
 			return;
 		}
@@ -142,15 +159,19 @@ public class RobotPlayer {
 			moveDirection = dirs[test_direction];
 			
 			if (rc.canMove(moveDirection)) {
-				if(mFlag)
+				if(!rVisited[rX + int_dirs_X[test_direction]][rY + int_dirs_Y[test_direction]])
 				{
-					rc.move(moveDirection);
+					if(mFlag)
+					{
+						rc.move(moveDirection);
+					}
+					else
+					{
+						rc.sneak(moveDirection);
+					}
+					rVisited[rX + int_dirs_X[test_direction]][rY + int_dirs_Y[test_direction]] = true;
+				//	System.out.println("rx: " + rX + " ry: " + rY);
 				}
-				else
-				{
-					rc.sneak(moveDirection);
-				}
-				System.out.println("rx: " + rX + " ry: " + rY);
 				return;
 			}
 		}
