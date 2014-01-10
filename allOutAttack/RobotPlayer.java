@@ -8,6 +8,10 @@ public class RobotPlayer {
 	static Random rand;
 	static MapLocation enemyHQ;
 	
+	//taken from coarsenser
+	static Direction allDirections[] = Direction.values();
+	static int directionalLooks[] = new int[]{0,1,-1,2,-2,3,-3,4};
+	
 	//start with examplefuncsplayer, attempt to modify
 	public static void run(RobotController rc) {
 		rand = new Random();
@@ -22,7 +26,7 @@ public class RobotPlayer {
 						enemyHQ = rc.senseEnemyHQLocation();
 					}
 					//Check if a robot is spawnable and spawn one if it is
-					if (rc.isActive() && rc.senseRobotCount() < 25) {
+					if (rc.isActive() && rc.senseRobotCount() < GameConstants.MAX_ROBOTS) {
 						Direction toEnemy = rc.getLocation().directionTo(rc.senseEnemyHQLocation());
 						if (rc.senseObjectAtLocation(rc.getLocation().add(toEnemy)) == null) {
 							rc.spawn(toEnemy);
@@ -42,15 +46,16 @@ public class RobotPlayer {
 							Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class,10,rc.getTeam().opponent());
 							if (nearbyEnemies.length > 0) {;
 								RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[0]);
-								rc.attackSquare(robotInfo.location);
+								MapLocation enemy = robotInfo.location;
+								rc.attackSquare(enemy);
 								//add code to move towards enemy unit being attacked
-								//System.out.println("moving towards enemy");
-								path.seekSimple(rc.getLocation(), robotInfo.location);
+								System.out.println("moving towards enemy");
+								Path.simpleMove(rc, enemy);
 							} else if (action<80){
 								//move towards enemy HQ
-								//System.out.println("going for HQ");
-								//SoldierException being thrown from here, not sure why
-								path.move1(false, rc.getLocation(), enemyHQ);
+								System.out.println("going for HQ");
+								Direction dir = rc.getLocation().directionTo(enemyHQ);
+								Path.tryToMove(dir, true, rc, directionalLooks, allDirections);
 							}
 						//Move in a random direction
 						} else if (action < 80) {

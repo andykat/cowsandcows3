@@ -1,17 +1,12 @@
-package allOutAttack;
+package coarsenserPlayer;
 
 import java.util.ArrayList;
 
 import coarsenserPlayer.RobotPlayer;
+
 import battlecode.common.*;
 
-/*
- * Started with BasicPathing from coarsenserPlayer
- * Modifying for testing allOutAttack - probably only 
- * good for local pathing.
- */
-
-public class Path{
+public class BasicPathing{
 	
 	static ArrayList<MapLocation> snailTrail = new ArrayList<MapLocation>();
 	
@@ -51,19 +46,6 @@ public class Path{
 				}
 			}
 			//System.out.println("I am at "+rc.getLocation()+", trail "+snailTrail.get(0)+snailTrail.get(1)+snailTrail.get(2));
-		}
-	}
-	
-	public static void simpleMove(RobotController rc, MapLocation target) throws GameActionException{
-		int directionalLooks[] = new int[]{0,1,-1,2,-2,3,-3,4};
-		Direction chosenDirection = rc.getLocation().directionTo(target);
-		for(int directionalOffset:directionalLooks){
-			int forwardInt = chosenDirection.ordinal();
-			Direction trialDir = Direction.values()[(forwardInt+directionalOffset+8)%8];
-			if(rc.canMove(trialDir)){
-				rc.move(trialDir);
-				break;
-			}
 		}
 	}
 	
