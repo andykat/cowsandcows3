@@ -1,14 +1,12 @@
 package allOutAttack;
 
-import battlecode.common.Direction;
-import battlecode.common.GameConstants;
-import battlecode.common.RobotController;
-import battlecode.common.RobotType;
 import battlecode.common.*;
+
 import java.util.*;
 
 public class RobotPlayer {
 	static Random rand;
+	static MapLocation enemyHQ;
 	
 	//start with examplefuncsplayer, attempt to modify
 	public static void run(RobotController rc) {
@@ -17,7 +15,12 @@ public class RobotPlayer {
 		
 		while(true) {
 			if (rc.getType() == RobotType.HQ) {
-				try {					
+				try {	
+					//first round only - find enemy HQ
+					//This works as intended.
+					if (Clock.getRoundNum() == 0 && rc.isActive()) {
+						enemyHQ = rc.senseEnemyHQLocation();
+					}
 					//Check if a robot is spawnable and spawn one if it is
 					if (rc.isActive() && rc.senseRobotCount() < 25) {
 						Direction toEnemy = rc.getLocation().directionTo(rc.senseEnemyHQLocation());
@@ -34,17 +37,20 @@ public class RobotPlayer {
 				try {
 					if (rc.isActive()) {
 						int action = (rc.getRobot().getID()*rand.nextInt(101) + 50)%101;
-						//Construct a PASTR
-						//never do this
-						//if (action < 1 && rc.getLocation().distanceSquaredTo(rc.senseHQLocation()) > 2) {
-							//rc.construct(RobotType.PASTR);
-						//Attack a random nearby enemy
-						//} else 
+						//never construct PASTRs
 						if (action < 30) {
 							Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class,10,rc.getTeam().opponent());
-							if (nearbyEnemies.length > 0) {
+							if (nearbyEnemies.length > 0) {;
 								RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[0]);
 								rc.attackSquare(robotInfo.location);
+								//add code to move towards enemy unit being attacked
+								//System.out.println("moving towards enemy");
+								path.seekSimple(rc.getLocation(), robotInfo.location);
+							} else if (action<80){
+								//move towards enemy HQ
+								//System.out.println("going for HQ");
+								//SoldierException being thrown from here, not sure why
+								path.move1(false, rc.getLocation(), enemyHQ);
 							}
 						//Move in a random direction
 						} else if (action < 80) {
