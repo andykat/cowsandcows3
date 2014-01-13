@@ -6,7 +6,11 @@ import java.util.ArrayList;
 import battlecode.common.*;
 
 public class locationServices {
-	
+	/*
+	 * CURRENT PROBLEM: does not implement BFS.  Is like allOutAttack in that only
+	 * short range pathing works - issues with long range happen when you
+	 * try to use short range algorithm for long range movement.
+	 */
 	static int directionalLooks[] = new int[]{0,1,-1,2,-2};
 	static Direction allDirections[] = Direction.values();
 	

@@ -67,15 +67,20 @@ public class pastureExterminator {
 	public static void attackNearByEnemies(RobotController rc) throws GameActionException
 	{
 		/*
-		 * I put in one of my fixes to prevent them getting stuck attacking the HQ.
+		 * I put in some of my fixes to prevent them getting stuck attacking the HQ,
+		 * and to have them check that an enemy is in range before shooting.
+		 * Might eventually want to add in some of the others to go after closest enemy?
 		 */
 		Robot[] nearbyEnemies = rc.senseNearbyGameObjects(Robot.class,10,rc.getTeam().opponent());
 		if (nearbyEnemies.length > 0) {
 			RobotInfo robotInfo = rc.senseRobotInfo(nearbyEnemies[randall.nextInt(nearbyEnemies.length)]);
-			if (robotInfo.type != RobotType.HQ){
-				rc.attackSquare(robotInfo.location);
-			}
-			//rc.attackSquare(robotInfo.location);
+			if (robotInfo.type != RobotType.HQ) {
+				if(robotInfo.location.distanceSquaredTo(rc.getLocation())<rc.getType().attackRadiusMaxSquared) {
+					rc.attackSquare(robotInfo.location); //attack if in range
+				} else { //if not, try to get closer
+					locationServices.simpleMove(rc, robotInfo.location);
+				}
+			} 
 			}		 
 	}
 }

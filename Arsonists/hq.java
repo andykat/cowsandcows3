@@ -11,6 +11,13 @@ public class hq {
 	static int statusReport[]= new int [25];
 	static int statusIteratorPosition= 0;
 	static Direction allDirections[] = Direction.values();
+	
+	//try to have HQ generate representation of map for BFS
+	//ideally HQ makes map and others download it
+	static boolean haveMap = false;
+	public static int[][] mapData;
+	static int bigBoxSize = 5;
+	
 	public static void run(RobotController rc) throws GameActionException {
 		//Look at surrounding for can move location
 		Direction spawnDir= allDirections[0];
@@ -34,7 +41,23 @@ public class hq {
 					//rc.broadcast(x+25, locationServices.locToInt(rc.senseEnemyHQLocation()));
 			}
 		}
+		
+		//generate map representation for download
+		if(haveMap == false) {
+			BreadthFirst.init(rc, bigBoxSize);
+			//pathfinding does not happen here, I think.
+			
+			//MapLocation goal = getRandomLocation();
+			//path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
+			//VectorFunctions.printPath(path,bigBoxSize);
+		}
+		MapAssessment.assessMap(4, rc);
+//		MapAssessment.printBigCoarseMap();
+//		MapAssessment.printCoarseMap();
+		mapData = MapAssessment.coarseMap;
+		haveMap = true;
 	}
+	
 	
 	public static boolean thereAreEnemyPSTR(RobotController rc) throws GameActionException 
 	{
