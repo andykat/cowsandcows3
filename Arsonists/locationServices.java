@@ -99,15 +99,15 @@ public class locationServices {
 		while(snailTrail.size()<2)
 			snailTrail.add(new MapLocation(-1,-1));
 		if(rc.isActive()){
-			snailTrail.remove(0);
-			snailTrail.add(rc.getLocation());
+			//snailTrail.remove(0);
+			//snailTrail.add(rc.getLocation());
 			for(int directionalOffset:directionalLooks){
 				int forwardInt = chosenDirection.ordinal();
 				Direction trialDir = allDirections[(forwardInt+directionalOffset+8)%8];
 				if(canMove(trialDir,selfAvoiding,rc)){
 					rc.move(trialDir);
-					//snailTrail.remove(0);
-					//snailTrail.add(rc.getLocation());
+					snailTrail.remove(0);
+					snailTrail.add(rc.getLocation());
 					break;
 				}
 			}
