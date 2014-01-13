@@ -82,10 +82,10 @@ public class RobotPlayer {
 			//Direction dir = rc.getLocation().directionTo(enemyHQ);
 			//Path.tryToMove(dir, true, rc, directionalLooks, allDirections);
 			Direction moveDirection = directions[rand.nextInt(8)];
-			if (rc.canMove(moveDirection)) {
-				rc.move(moveDirection); //random direction
+			while (rc.canMove(moveDirection) == false) {// can it go in random direction?
+				moveDirection = directions[rand.nextInt(8)];
 			}
-			
+			rc.move(moveDirection);
 		}
 	} 
 }
