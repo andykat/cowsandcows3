@@ -4,6 +4,7 @@ import battlecode.common.*;
 
 import java.util.*;
 
+
 public class RobotPlayer {
         static Random rand;
         static MapLocation enemyHQ;
@@ -11,6 +12,7 @@ public class RobotPlayer {
         //taken from coarsenser
         static Direction allDirections[] = Direction.values();
         static int directionalLooks[] = new int[]{0,1,-1,2,-2,3,-3,4};
+
 
         static Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
 
@@ -23,9 +25,13 @@ public class RobotPlayer {
                                 try {        
                                         //first round only - find enemy HQ
                                         //This works as intended.
+                                	/*
+                                	 * add this
+                                	 */
                                         if (Clock.getRoundNum() == 0 && rc.isActive()) {
                                                 enemyHQ = rc.senseEnemyHQLocation();
                                         }
+                                        
                                         //Check if a robot is spawnable and spawn one if it is
                                         if (rc.isActive() && rc.senseRobotCount() < GameConstants.MAX_ROBOTS) {
                                                 Direction toEnemy = rc.getLocation().directionTo(rc.senseEnemyHQLocation());
@@ -60,11 +66,18 @@ public class RobotPlayer {
                                 for(int i=0;i<nearbyEnemies.length;i++){
                                         Robot anEnemy = nearbyEnemies[i];
                                         RobotInfo anEnemyInfo = rc.senseRobotInfo(anEnemy);
+                                        /* 
+                                         * add this
+                                         */
                                         if (anEnemyInfo.type != RobotType.HQ){
                                                 //only consider non-HQ enemy units
                                                 robotLocations[i] = anEnemyInfo.location;
                                         } 
                                 }
+                                /*
+                                 * maybe add some of this if you want to have them go 
+                                 * after enemy robots as well
+                                 */
                                 MapLocation closestEnemyLoc = VectorFunc.findClosest(robotLocations, rc.getLocation());
                                 if(closestEnemyLoc.distanceSquaredTo(rc.getLocation())<rc.getType().attackRadiusMaxSquared){
                                         System.out.println("trying to shoot");
@@ -83,9 +96,10 @@ public class RobotPlayer {
                         //Path.tryToMove(dir, true, rc, directionalLooks, allDirections);
                         Direction moveDirection = directions[rand.nextInt(8)];
                         if (rc.canMove(moveDirection)) {
-                                rc.move(moveDirection); //random direction
+                                rc.move(moveDirection); //random direction 
                         }
                         
                 }
         } 
+        
 }
