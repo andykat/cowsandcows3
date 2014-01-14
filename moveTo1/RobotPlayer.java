@@ -5,9 +5,9 @@ import battlecode.common.*;
 
 import java.util.*;
 /*channels
- * 1 # of corners 
+ * 1 # of robots spawned 
  * 2 # of cow pushers
- * 3
+ * 3 # of corners
  * 4
  * 5
  * 6
@@ -24,6 +24,7 @@ import java.util.*;
  * 41 corner 1 pushing data
  * 42
  */
+
 public class RobotPlayer {
 	public static RobotController rc;
 	
@@ -69,7 +70,15 @@ public class RobotPlayer {
 		//set robot variables
 		if(rc.getType()==RobotType.SOLDIER)
 		{
-			rType = rc.senseRobotCount()%100; //type
+			int robotCount=0;
+			try {
+				robotCount = rc.readBroadcast(1)+1;
+				rc.broadcast(1, robotCount);
+			} catch (GameActionException e) {
+				e.printStackTrace();
+			}
+			
+			rType = robotCount; //type
 			rVisited = new int[width][height]; //saving visited locations
 			for(int i=0;i<width;i++)
 			{
@@ -115,7 +124,6 @@ public class RobotPlayer {
 		//if(Clock.getRoundNum()>=lastSpawnRound+GameConstants.HQ_SPAWN_DELAY_CONSTANT_1){
 		if(rc.isActive()&&rc.canMove(dirs[0])&&rc.senseRobotCount()<GameConstants.MAX_ROBOTS){
 			rc.spawn(dirs[0]);
-			//System.out.println("readbroad: " + rc.readBroadcast(1));
 			//lastSpawnRound=Clock.getRoundNum();
 		}
 		//}
@@ -123,11 +131,7 @@ public class RobotPlayer {
 	public static void cowPushBot() throws GameActionException {
 		if(rc.isActive())
 		{
-			if(rType==5)
-			{
-				System.out.println("r5:" + rAction);
-			}
-			//System.out.println("raction:" + rAction);
+
 			if(rAction.equals("init"))
 			{
 				int current_CowPushers = rc.readBroadcast(2)+1;
@@ -145,32 +149,32 @@ public class RobotPlayer {
 				}
 				
 				move_Outside_Count = 0;
-				if(rType==5)
-				{
-					System.out.println("wtfmate");
-					System.out.println("corner:" + corner_Index);
-				}
+
 				rAction = "wFC";
 			}
 			else if(rAction.equals("wFC")) // Waiting For Corner
 			{
-				int Ncorners = rc.readBroadcast(1);
-				if(rType==5)
-				{
-					System.out.println("NCorners:" + Ncorners);
-				}
+				int Ncorners = rc.readBroadcast(3);
+
 				if(Ncorners > corner_Index-1)
 				{
 					rAction = "cF";
 				}
 				else
-				{	
+				{
 					move_Outside_Count++;
 					if(move_Outside_Count<11)
 					{
 						Direction moveDirection = dirs[rand.nextInt(8)];
 						if (rc.canMove(moveDirection)) {
 							rc.move(moveDirection);
+						}
+						else
+						{
+							Direction t = dirs[rand.nextInt(8)];
+							if (rc.canMove(t)) {
+								rc.move(t);
+							}
 						}
 					}
 				}
@@ -188,10 +192,11 @@ public class RobotPlayer {
 				
 				
 				rAction = "moveToPushLoc";
-				rDestinationX = pastureX - 10 * int_dirs_X[pastureDir] + push_init_loc_X[cow_push_type]*int_dirs_X[pastureDir] - 2*int_dirs_Y[pastureDir];
-				rDestinationY = pastureX - 10 * int_dirs_X[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir] + 2*int_dirs_X[pastureDir];
+				rDestinationX = pastureX - push_Radius * int_dirs_X[pastureDir] + push_init_loc_X[cow_push_type]*int_dirs_X[pastureDir] - 4*int_dirs_Y[pastureDir];
+				rDestinationY = pastureY - push_Radius * int_dirs_Y[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir] + 4*int_dirs_X[pastureDir];
 				
-				System.out.println("dx: "+ rDestinationX + " dy: " + rDestinationY);
+				System.out.println("dx: "+ rDestinationX + " dy: " + rDestinationY + " ct: " + cow_push_type);
+				System.out.println("x1: " + push_init_loc_X[cow_push_type]*int_dirs_X[pastureDir] + " x2: " + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir]);
 				move(true);
 			}
 			else if(rAction.equals("moveToPushLoc"))
@@ -221,38 +226,37 @@ public class RobotPlayer {
 					int temp_Dir = rc.readBroadcast(40+corner_Index);
 					if(temp_Dir%2 == 1)
 					{
-						System.out.println("mod: " + temp_Dir+1%10);
 						if((temp_Dir+1)%10==0)
 						{
 							rDestinationX = pastureX - push_Radius * int_dirs_X[pastureDir] + push_init_loc_X[cow_push_type]*int_dirs_X[pastureDir] - 4*int_dirs_Y[pastureDir];
-							rDestinationY = pastureY - push_Radius * int_dirs_X[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir] + 4*int_dirs_X[pastureDir];
+							rDestinationY = pastureY - push_Radius * int_dirs_Y[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir] + 4*int_dirs_X[pastureDir];
 						}
 						else if((temp_Dir+1)%10==2)
 						{
 							rDestinationX = pastureX - push_Radius * int_dirs_X[pastureDir] + push_init_loc_X[cow_push_type]*int_dirs_X[pastureDir] + 4*int_dirs_Y[pastureDir];
-							rDestinationY = pastureY - push_Radius * int_dirs_X[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir] - 4*int_dirs_X[pastureDir];
+							rDestinationY = pastureY - push_Radius * int_dirs_Y[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir] - 4*int_dirs_X[pastureDir];
 						}
 						else if((temp_Dir+1)%10==4)
 						{
 							rDestinationX = pastureX - push_Radius * int_dirs_X[pastureDir] + push_init_loc_X[cow_push_type]*int_dirs_X[pastureDir] - 8*int_dirs_Y[pastureDir];
-							rDestinationY = pastureY - push_Radius * int_dirs_X[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir] + 8*int_dirs_X[pastureDir];
+							rDestinationY = pastureY - push_Radius * int_dirs_Y[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir] + 8*int_dirs_X[pastureDir];
 						}
 						else if((temp_Dir+1)%10==6)
 						{
 							rDestinationX = pastureX - push_Radius * int_dirs_X[pastureDir] + push_init_loc_X[cow_push_type]*int_dirs_X[pastureDir] + 8*int_dirs_Y[pastureDir];
-							rDestinationY = pastureY - push_Radius * int_dirs_X[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir] - 8*int_dirs_X[pastureDir];
+							rDestinationY = pastureY - push_Radius * int_dirs_Y[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir] - 8*int_dirs_X[pastureDir];
 						}
 						else if((temp_Dir+1)%10==8)
 						{
 							rDestinationX = pastureX - push_Radius * int_dirs_X[pastureDir] + push_init_loc_X[cow_push_type]*int_dirs_X[pastureDir];
-							rDestinationY = pastureY - push_Radius * int_dirs_X[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir];
+							rDestinationY = pastureY - push_Radius * int_dirs_Y[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir];
 						}
 						rAction = "return";
 					}
 					else
 					{
 						rDestinationX = pastureX - 1 * int_dirs_X[pastureDir] + push_init_loc_X[cow_push_type]*int_dirs_X[pastureDir];
-						rDestinationY = pastureY - 1 * int_dirs_X[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir];
+						rDestinationY = pastureY - 1 * int_dirs_Y[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir];
 						rAction = "push";
 					}
 					//move(true);
@@ -305,7 +309,7 @@ public class RobotPlayer {
 			}
 			else if(rAction.equals("moving"))
 			{
-				move(false);
+				move(true);
 			}
 			else if(rAction.equals("makePasture"))
 			{
@@ -333,8 +337,8 @@ public class RobotPlayer {
 			if(rType_s==1)
 			{
 					//found corner
-					int Ncorners = rc.readBroadcast(1) + 1;
-					rc.broadcast(1, Ncorners);
+					int Ncorners = rc.readBroadcast(3) + 1;
+					rc.broadcast(3, Ncorners);
 					rc.broadcast(10 + Ncorners, rX*100 + rY);
 					
 					int tdirection = 0;
@@ -345,7 +349,7 @@ public class RobotPlayer {
 					}
 					if(rType==4)
 					{
-						tdirection = 2;
+						tdirection = 1;
 					}
 					System.out.println("direction:" + tdirection);
 					rc.broadcast(20+Ncorners, tdirection);
@@ -359,17 +363,14 @@ public class RobotPlayer {
 					rAction = "wait";
 					int current_CowPushers = rc.readBroadcast(30+corner_Index);
 					rc.broadcast(30+corner_Index, current_CowPushers+10);
-					System.out.println("added");
 				}
 				else if(rAction.equals("push") || rAction.equals("return"))
 				{
-					System.out.println("test1");
 					rAction = "wait";
 					int current_CowPushers = rc.readBroadcast(30+corner_Index);
 					rc.broadcast(30+corner_Index, current_CowPushers+10);
 					if(current_CowPushers+10>20)
 					{
-						System.out.println("test2");
 						int temp_dir = rc.readBroadcast(40+corner_Index);
 						rc.broadcast(40+corner_Index, temp_dir + 1);
 					}
@@ -451,7 +452,6 @@ public class RobotPlayer {
 					{
 						return;
 					}
-				//	System.out.println("rx: " + rX + " ry: " + rY);
 				}
 				
 			}
@@ -470,7 +470,7 @@ public class RobotPlayer {
 			if(cornerFlag>2 && !movedFlag)
 			{
 				//found corner
-				int Ncorners = rc.readBroadcast(1) + 1;
+				int Ncorners = rc.readBroadcast(3) + 1;
 				rc.broadcast(1, Ncorners);
 				rc.broadcast(10 + Ncorners, rX*100 + rY);
 				
