@@ -14,9 +14,12 @@ public class hq {
 	
 	//try to have HQ generate representation of map for BFS
 	//ideally HQ makes map and others download it
+	/*
 	static boolean haveMap = false;
 	public static int[][] mapData;
 	static int bigBoxSize = 5;
+	*/
+	//doing in soldiers for scrimmage purposes.
 	
 	public static void run(RobotController rc) throws GameActionException {
 		//Look at surrounding for can move location
@@ -43,6 +46,7 @@ public class hq {
 		}
 		
 		//generate map representation for download
+		/*
 		if(haveMap == false) {
 			BreadthFirst.init(rc, bigBoxSize);
 			//pathfinding does not happen here, I think.
@@ -55,7 +59,7 @@ public class hq {
 //		MapAssessment.printBigCoarseMap();
 //		MapAssessment.printCoarseMap();
 		mapData = MapAssessment.coarseMap;
-		haveMap = true;
+		haveMap = true; */
 	}
 	
 	

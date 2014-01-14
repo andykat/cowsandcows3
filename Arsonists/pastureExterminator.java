@@ -1,11 +1,21 @@
 package Arsonists;
 
+import java.util.ArrayList;
 import java.util.Random;
 
+
+//import coarsenserPlayer.BreadthFirst;
+//import coarsenserPlayer.VectorFunctions;
 import battlecode.common.*;
 
 public class pastureExterminator {
 	static Random randall = new Random();
+	static Direction allDirections[] = Direction.values();
+	static int directionalLooks[] = new int[]{0,1,-1,2,-2,3,-3,4};
+	static ArrayList<MapLocation> path;
+	static int bigBoxSize = 5;
+	static MapLocation goal;
+	
 	public static void run(RobotController rc) throws GameActionException {
 		/*1. Download pasture assignment (i.e. an integer from HQ, signifying the closest pasture available)
 		 *2. Find path to said location, use a smarter algorithm, maybe Dijkstra
@@ -20,6 +30,9 @@ public class pastureExterminator {
 			if (thereAreNearbyEnemies(rc)){
 				attackNearByEnemies(rc);
 			}
+			
+			path = RobotPlayer.path;
+			
 			if (rc.readBroadcast(rc.getRobot().getID())== 0){
 				if (rc.readBroadcast(hq.getStatusIterator()+25)!= -1){
 					MapLocation target= locationServices.intToLoc(hq.getStatusIterator()+25);
@@ -30,8 +43,12 @@ public class pastureExterminator {
 					}
 				}
 				else{
-					locationServices.tryToMove(rc.getLocation().directionTo(locationServices.intToLoc(rc.readBroadcast(hq.getStatusIterator()+25))), false, rc);
+					//locationServices.tryToMove(rc.getLocation().directionTo(locationServices.intToLoc(rc.readBroadcast(hq.getStatusIterator()+25))), false, rc);
 					//Write a better move to location function later
+
+					//follow breadthFirst path
+					Direction bdir = BreadthFirst.getNextDirection(path, bigBoxSize);
+					locationServices.tryToMove(bdir, true, rc);
 				}		
 				hq.iterate(rc);
 				}
@@ -81,6 +98,7 @@ public class pastureExterminator {
 					locationServices.simpleMove(rc, robotInfo.location);
 				}
 			} 
-			}		 
+			}
 	}
+	
 }
