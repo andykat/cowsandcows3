@@ -10,7 +10,7 @@ import battlecode.common.RobotController;
 public class hq {
 	static int statusReport[]= new int [25];
 	static int statusIteratorPosition= 0;
-	static Direction allDirections[] = Direction.values();
+	static Direction allDirections[] = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
 	
 	//try to have HQ generate representation of map for BFS
 	//ideally HQ makes map and others download it
