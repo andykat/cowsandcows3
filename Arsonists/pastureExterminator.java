@@ -47,8 +47,10 @@ public class pastureExterminator {
 					//Write a better move to location function later
 
 					//follow breadthFirst path
-					Direction bdir = BreadthFirst.getNextDirection(path, bigBoxSize);
-					locationServices.tryToMove(bdir, true, rc);
+					if (path.size() != 0) {
+						Direction bdir = BreadthFirst.getNextDirection(path, bigBoxSize);
+						locationServices.tryToMove(bdir, true, rc);
+					}
 				}		
 				hq.iterate(rc);
 				}

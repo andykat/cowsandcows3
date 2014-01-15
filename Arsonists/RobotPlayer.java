@@ -13,7 +13,7 @@ public class RobotPlayer{
 	static int enemeyPastureIterate;
 	
 	static Direction allDirections[] = Direction.values();
-	static ArrayList<MapLocation> path;
+	public static ArrayList<MapLocation> path;
 	static int bigBoxSize = 5;
 	static MapLocation goal;
 	
@@ -21,6 +21,7 @@ public class RobotPlayer{
 		rc = rcin;
 		randall.setSeed(rc.getRobot().getID());
 		
+		if(rc.getType() == RobotType.SOLDIER) {
 		BreadthFirst.init(rc, bigBoxSize);
 		try {
 		goal = locationServices.intToLoc(rc.readBroadcast(hq.getStatusIterator()+25));
@@ -29,15 +30,18 @@ public class RobotPlayer{
 		}
 		path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
 		//VectorFunctions.printPath(path,bigBoxSize);
+		}
 		
 		while(true){
 			try{
 				if(rc.getType()==RobotType.HQ){//if I'm a headquarters
 					hq.run(rc);
 				}else if(rc.getType()==RobotType.SOLDIER){
-					if(path.size()==0){
+					if(path.size() == 0){
 						goal = getRandomLocation();
 						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(), bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
+						//System.out.println("random dest");
+						//this prints once in a while but somehow nobody is pathing after some point
 					}
 					pastureExterminator.run(rc);
 				}
