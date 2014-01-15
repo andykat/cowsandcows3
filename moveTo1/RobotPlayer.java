@@ -28,8 +28,9 @@ import java.util.*;
 public class RobotPlayer {
 	public static RobotController rc;
 	
-	public static Direction[] dirs = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST
-		,Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
+	public static Direction[] dirs = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST,
+									  Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST
+									 };
 	public static int[] int_dirs_X = {0,1,1,1,0,-1,-1,-1};
 	public static int[] int_dirs_Y = {-1,-1,0,1,1,1,0,-1};
 	static Random rand;
@@ -54,9 +55,12 @@ public class RobotPlayer {
 	public static int[] push_init_loc_X = { 0,-1, 1,-1};
 	public static int[] push_init_loc_Y = {-1, 0,-1, 1};
 	public static int pastureDir;
-	public static int push_Radius = 8;
+	public static int push_Radius = 4;
 	
 	public static int move_Outside_Count;
+	public static double[] Map_Corners_X = {1.0,1.0,1.0,1.0};
+	public static double[] Map_Corners_Y = {1.0,1.0,1.0,1.0};
+	
 	public static void run(RobotController myRC) {
 		rc = myRC;
 		
@@ -66,6 +70,7 @@ public class RobotPlayer {
 		
 		width = rc.getMapWidth();
 		height = rc.getMapHeight();
+
 		
 		//set robot variables
 		if(rc.getType()==RobotType.SOLDIER)
@@ -98,21 +103,21 @@ public class RobotPlayer {
 				}else if (rc.getType()==RobotType.SOLDIER){
 					rX = rc.getLocation().x;
 					rY = rc.getLocation().y;
-					if(rType == 1 || rType == 4)
+					if(rType == 1 || rType == 3)
 					{
 						rType_s = 1;
 						pastureBot(); //find corner and build pasture
 					}
-					else if(rType == 2 || rType == 3)
+					else if(rType == 2 || rType == 4)
 					{
 						rType_s = 2;
 						cowPushBot(); //move cows into pastures
 					}
-					else if(rType == 5 || rType == 6)
+					/*else if(rType == 5 || rType == 6)
 					{
 						rType_s = 2;
 						cowPushBot(); //move cows into pastures
-					}
+					}*/
 				}
 			}catch(Exception e){
 				e.printStackTrace();
@@ -136,8 +141,8 @@ public class RobotPlayer {
 			{
 				int current_CowPushers = rc.readBroadcast(2)+1;
 				rc.broadcast(2, current_CowPushers);
-				corner_Index = (current_CowPushers-1)/2 + 1;
-				
+				corner_Index = current_CowPushers;
+				System.out.println("corner_index:" + corner_Index);
 				int Ncowpushers = rc.readBroadcast(30 + corner_Index);
 				cow_push_type = Ncowpushers%10;
 				rc.broadcast(30+corner_Index, Ncowpushers + 1);
@@ -181,6 +186,7 @@ public class RobotPlayer {
 			}
 			else if(rAction.equals("cF")) // Corner Found
 			{
+				System.out.println("wtfff");
 				 pastureDir = rc.readBroadcast(20 + corner_Index);
 				
 				int pasture_Loc = rc.readBroadcast(10 + corner_Index);
@@ -207,7 +213,7 @@ public class RobotPlayer {
 			{
 				int  tempC = rc.readBroadcast(30+corner_Index);
 				int current_CowPushers = tempC/10;
-				if(current_CowPushers>1)
+				/*if(current_CowPushers>1)
 				{
 					//ready to start push
 					//System.out.println("started");
@@ -220,7 +226,7 @@ public class RobotPlayer {
 						rc.broadcast(30+corner_Index, tempC - 100);
 					}
 					
-					
+				*/	
 					
 					
 					int temp_Dir = rc.readBroadcast(40+corner_Index);
@@ -250,6 +256,7 @@ public class RobotPlayer {
 						{
 							rDestinationX = pastureX - push_Radius * int_dirs_X[pastureDir] + push_init_loc_X[cow_push_type]*int_dirs_X[pastureDir];
 							rDestinationY = pastureY - push_Radius * int_dirs_Y[pastureDir] + push_init_loc_Y[cow_push_type]*int_dirs_Y[pastureDir];
+							push_Radius += 4;
 						}
 						rAction = "return";
 					}
@@ -260,7 +267,7 @@ public class RobotPlayer {
 						rAction = "push";
 					}
 					//move(true);
-				}
+				//}
 			}
 			else if(rAction.equals("push"))
 			{
@@ -283,7 +290,7 @@ public class RobotPlayer {
 				//rDestinationY = rand.nextInt(height);
 				
 				//set destination corner
-				if(rType == 1)
+				/*if(rType == 1)
 				{
 					rDestinationX = 1;
 					rDestinationY = 1;
@@ -298,13 +305,58 @@ public class RobotPlayer {
 					rDestinationX = 1;
 					rDestinationY = height - 1;
 				}
-				else if(rType == 4)
+				else if(rType == 3)
 				{
 					rDestinationX = width - 2;
 					rDestinationY = 1;
-				}
+				}*/
 				//System.out.println("type:" + rType);
 				//System.out.println("rdx: " +  rDestinationX + " rdy: " + rDestinationY);
+				//find closest corner
+				Map_Corners_X[2] = ((double)width)-2.0;
+				Map_Corners_X[3] = ((double)width)-2.0;
+				Map_Corners_Y[1] = ((double)height)-2.0;
+				Map_Corners_Y[2] = ((double)height)-2.0;
+				double min_dist=0;
+				int index=-1;
+				double hqX = (double)rc.senseHQLocation().x;
+				double hqY = (double)rc.senseHQLocation().y;
+				int rx = 0;
+				int ry = 0;
+				int corners = rType/2+1;
+				System.out.println("cornerblah:" + corners);
+				for(int j=0;j<corners;j++)
+				{
+					index = -1;
+					min_dist=1000000.0;
+					for(int i=0;i<4;i++)
+					{
+						double cornerdist = (hqX-Map_Corners_X[i])*(hqX-Map_Corners_X[i]) + (hqY-Map_Corners_Y[i])*(hqY-Map_Corners_Y[i]);
+						if(cornerdist<min_dist)
+						{
+							min_dist = cornerdist;
+							index = i;
+						}
+					}
+					rx = (int) Map_Corners_X[index];
+					ry = (int) Map_Corners_Y[index];
+					Map_Corners_X[index] = 305.0;
+					Map_Corners_Y[index] = 305.0;
+				}
+				
+				if(index==-1)
+				{
+					rAction = "fail";
+					return;
+				}
+				else
+				{
+					rDestinationX = rx;
+					rDestinationY = ry;
+					System.out.println("mx:" + rDestinationX);
+					System.out.println("my:" + rDestinationY);
+				}
+				
 				rAction = "moving";
 			}
 			else if(rAction.equals("moving"))
@@ -342,15 +394,30 @@ public class RobotPlayer {
 					rc.broadcast(10 + Ncorners, rX*100 + rY);
 					
 					int tdirection = 0;
-					
-					if(rType==1)
+					if(rX == 1 && rY ==1)
 					{
 						tdirection = 7;
 					}
-					if(rType==4)
+					else if(rX == width - 2 && rY == 1)
 					{
 						tdirection = 1;
 					}
+					else if(rX == width - 2 && rY == height - 2)
+					{
+						tdirection = 3;
+					}
+					else if(rX == 1 && rY == height - 2)
+					{
+						tdirection = 5;
+					}
+					/*if(rType==1)
+					{
+						tdirection = 7;
+					}
+					if(rType==3)
+					{
+						tdirection = 1;
+					}*/
 					System.out.println("direction:" + tdirection);
 					rc.broadcast(20+Ncorners, tdirection);
 					
@@ -362,18 +429,18 @@ public class RobotPlayer {
 				{
 					rAction = "wait";
 					int current_CowPushers = rc.readBroadcast(30+corner_Index);
-					rc.broadcast(30+corner_Index, current_CowPushers+10);
+					//rc.broadcast(30+corner_Index, current_CowPushers+10);
 				}
 				else if(rAction.equals("push") || rAction.equals("return"))
 				{
 					rAction = "wait";
 					int current_CowPushers = rc.readBroadcast(30+corner_Index);
-					rc.broadcast(30+corner_Index, current_CowPushers+10);
-					if(current_CowPushers+10>20)
-					{
+					//rc.broadcast(30+corner_Index, current_CowPushers+10);
+					//if(current_CowPushers+10>20)
+					//{
 						int temp_dir = rc.readBroadcast(40+corner_Index);
 						rc.broadcast(40+corner_Index, temp_dir + 1);
-					}
+					//}
 				}
 			}
 			return;
@@ -405,8 +472,16 @@ public class RobotPlayer {
 		double cornerXSum = 0;
 		double cornerYSum = 0;
 		//find closest direction
+		if(rType==1)
+		{
+			if(rX == 2 && rY == 2)	System.out.println("rx: " + rX + " ry: " + rY);
+		}
 		for(int i=1;i<9;i++)
 		{
+			if(rType==1)
+			{
+				if(rX == 2 && rY == 2)	System.out.println("conerf:" + cornerFlag);
+			}
 			int test_direction = i;
 			if(test_direction%2 == 1)
 			{
@@ -427,14 +502,43 @@ public class RobotPlayer {
 			if (rc.canMove(moveDirection)) {
 				if(rVisited[rX + int_dirs_X[test_direction]][rY + int_dirs_Y[test_direction]]==-1/* || rVisited[rX + int_dirs_X[test_direction]][rY + int_dirs_Y[test_direction]]!= test_direction*/)
 				{
-					//move!
-					if(mFlag)
+					if(rType_s==2)
 					{
-						rc.move(moveDirection);
+						int cur_dist = (rDestinationX - rX)*(rDestinationX - rX) + (rDestinationY - rY)*(rDestinationY - rY);
+						int new_dist = (rDestinationX - (rX + int_dirs_X[test_direction]))*(rDestinationX - (rX + int_dirs_X[test_direction])) + (rDestinationY - (rY + int_dirs_Y[test_direction]))*(rDestinationY - (rY + int_dirs_Y[test_direction]));
+						if(new_dist>cur_dist)
+						{
+							if(rAction.equals("moveToPushLoc"))
+							{
+								rAction = "wait";
+								int current_CowPushers = rc.readBroadcast(30+corner_Index);
+								//rc.broadcast(30+corner_Index, current_CowPushers+10);
+							}
+							else if(rAction.equals("push") || rAction.equals("return"))
+							{
+								rAction = "wait";
+								int current_CowPushers = rc.readBroadcast(30+corner_Index);
+								//rc.broadcast(30+corner_Index, current_CowPushers+10);
+						//		if(current_CowPushers+10>20)
+						//		{
+									int temp_dir = rc.readBroadcast(40+corner_Index);
+									rc.broadcast(40+corner_Index, temp_dir + 1);
+						//		}
+							}
+							return;
+						}
 					}
-					else
+					//move!
+					if(!movedFlag)
 					{
-						rc.sneak(moveDirection);
+						if(mFlag)
+						{
+							rc.move(moveDirection);
+						}
+						else
+						{
+							rc.sneak(moveDirection);
+						}
 					}
 					if(rVisited[rX + int_dirs_X[test_direction]][rY + int_dirs_Y[test_direction]]==-1)
 					{
@@ -442,6 +546,8 @@ public class RobotPlayer {
 					}
 					if(rType_s==1)
 					{
+						
+						
 						movedFlag = true;
 						if(cornerFlag == 0)
 						{
@@ -459,6 +565,10 @@ public class RobotPlayer {
 			{
 				if(rType_s==1)
 				{
+					if(rType==1)
+					{
+						if(rX == 2 && rY == 2)	System.out.println("dir:" + test_direction);
+					}
 					cornerFlag++;
 					cornerXSum += (double) int_dirs_X[test_direction];
 					cornerYSum += (double) int_dirs_Y[test_direction];
@@ -467,16 +577,18 @@ public class RobotPlayer {
 		}
 		if(rType_s==1)
 		{
-			if(cornerFlag>2 && !movedFlag)
+			//rc.setIndicatorString(0, Integer.toString(cornerFlag));
+			//System.out.println("what");
+			if(cornerFlag>4)
 			{
 				//found corner
 				int Ncorners = rc.readBroadcast(3) + 1;
-				rc.broadcast(1, Ncorners);
+				rc.broadcast(3, Ncorners);
 				rc.broadcast(10 + Ncorners, rX*100 + rY);
-				
+				System.out.println("wtf corners:" + Ncorners);
 				//find corner direction
-				double tdx = (double)Math.round((cornerXSum/((double)cornerFlag)));
-				double tdy = (double)(Math.round(cornerYSum/((double)cornerFlag)));
+				double tdx = (double)Math.round((cornerXSum/2.0));
+				double tdy = (double)(Math.round(cornerYSum/2.0));
 				double tangle = Math.atan(tdy/tdx);
 				if(dx<0.0)
 				{
