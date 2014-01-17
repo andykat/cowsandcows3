@@ -8,7 +8,7 @@ import battlecode.common.*;
 public class RobotPlayer{
 	
 	static RobotController rc;
-	static Direction allDirections[] = Direction.values();
+	static Direction allDirections[] = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
 	static Random randall = new Random();
 	static int directionalLooks[] = new int[]{0,1,-1,2,-2,3,-3,4};
 	static ArrayList<MapLocation> path;
