@@ -3,10 +3,17 @@ package team164;
 import java.util.ArrayList;
 import java.util.Random;
 
+
 import battlecode.common.*;
 
 public class pastureExterminator {
+	
 	static Random randall = new Random();
+	static ArrayList<MapLocation> path;
+	static int bigBoxSize = 5;
+	static Direction allDirections[] = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
+	static int directionalLooks[] = new int[]{0,1,-1,2,-2,3,-3,4};
+	
 	public static void run(RobotController rc) throws GameActionException {
 		/*
 		 * Channel:
@@ -64,6 +71,10 @@ public class pastureExterminator {
 								find closest enemy, attack it, and broadcast to respective team attack channel
 						else evade 
 		 */
+		//BreadthFirst.init(rc, bigBoxSize);
+		MapLocation goal = getRandomLocation(rc);
+		//path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
+		
 		if (rc.isActive())
 		{
 			if (thereAreNearbyEnemies(rc)){
@@ -84,12 +95,22 @@ public class pastureExterminator {
 					evade(rc);
 			}
 			else
-				if (rc.sensePastrLocations(rc.getTeam().opponent()).length> 0)
+				if (rc.sensePastrLocations(rc.getTeam().opponent()).length> 0) {
+					//short range pathfinding simpleMove
+					goal = rc.sensePastrLocations(rc.getTeam().opponent())[0];
 					locationServices.simpleMove(rc, rc.sensePastrLocations(rc.getTeam().opponent())[0]);
-				else{
-					locationServices.simpleMove(rc, locationServices.getRandomLocation(rc));
-					//locationServices.simpleMove(rc,locationServices.intToLoc(rc.readBroadcast(0)));
+					//path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
+					
+				} else {
+					//if(path.size()==0){
+						//goal = getRandomLocation(rc);
+						//path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(rc.senseEnemyHQLocation(),bigBoxSize), 100000);
+					//}
+
 				}
+			//follow breadthFirst path
+			//Direction bdir = BreadthFirst.getNextDirection(path, bigBoxSize);
+			//locationServices.tryToMove(bdir, true, rc);//, directionalLooks, allDirections);
 		}
 	}
 	
@@ -224,5 +245,9 @@ public class pastureExterminator {
 	
 	public static void attackNearestEnemy(RobotController rc){
 		
+	}
+	
+	private static MapLocation getRandomLocation(RobotController rc) {
+		return new MapLocation(randall.nextInt(rc.getMapWidth()),randall.nextInt(rc.getMapHeight()));
 	}
 }
