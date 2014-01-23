@@ -1,5 +1,6 @@
 package Arsonists;
 
+
 import battlecode.common.*;
 
 import java.util.Random;

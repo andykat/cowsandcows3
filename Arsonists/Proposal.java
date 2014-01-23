@@ -1,5 +1,6 @@
 package Arsonists;
 
+
 import java.util.ArrayList;
 
 import battlecode.common.*;

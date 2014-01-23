@@ -1,5 +1,6 @@
 package Arsonists;
 
+
 import battlecode.common.*;
 
 public class MapAssessment{

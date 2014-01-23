@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import battlecode.common.*;
 
+
 public class BreadthFirst {
 
 	public static RobotController rc;

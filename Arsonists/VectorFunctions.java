@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import battlecode.common.MapLocation;
 
+
 public class VectorFunctions {
 	public static MapLocation findClosest(MapLocation[] manyLocs, MapLocation point){
 		int closestDist = 10000000;

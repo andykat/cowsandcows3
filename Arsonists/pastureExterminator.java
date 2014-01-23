@@ -5,6 +5,7 @@ import java.util.Random;
 
 import battlecode.common.*;
 
+
 public class pastureExterminator {
 	static Random randall = new Random();
 	public static void run(RobotController rc) throws GameActionException {
