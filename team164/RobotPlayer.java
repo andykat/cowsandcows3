@@ -123,9 +123,15 @@ public class RobotPlayer{
 					//short range pathfinding simpleMove
 					//locationServices.simpleMove(rc, rc.sensePastrLocations(rc.getTeam().opponent())[0]);
 					MapLocation goal = rc.sensePastrLocations(rc.getTeam().opponent())[0];
-					if (path.size() != 0 && path.get(path.size()-1) != goal){
+					
+					//This part is not working - gets called all the time
+					if (path.size() != 0 && !path.get(path.size()-1).equals(VectorFunctions.mldivide(goal,bigBoxSize))){
 						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
 						System.out.println("recalculate");
+					}
+					if(path.size()==0){
+						//goal = getRandomLocation();
+						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(rc.senseEnemyHQLocation(),bigBoxSize), 100000);
 					}
 				} else {
 					if(path.size()==0){
