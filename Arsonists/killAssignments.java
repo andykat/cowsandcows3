@@ -1,12 +1,13 @@
 package Arsonists;
 
-
-public class killAssignments {
-	int ID, killLocation;
-	public killAssignments(int iID, int ikillLocation)
-	{
-		ID= iID;
-		killLocation= ikillLocation;
-	}
-	
+public class killAssignments
+{
+  int ID;
+  int killLocation;
+  
+  public killAssignments(int iID, int ikillLocation)
+  {
+    this.ID = iID;
+    this.killLocation = ikillLocation;
+  }
 }

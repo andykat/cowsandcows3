@@ -99,6 +99,7 @@ public class locationServices {
 		return rc.canMove(dir);
 	}
 	
+	/*
 	public static void tryToMove(Direction chosenDirection,boolean selfAvoiding,RobotController rc) throws GameActionException{
 		while(snailTrail.size()<2)
 			snailTrail.add(new MapLocation(-1,-1));
@@ -117,6 +118,29 @@ public class locationServices {
 			}
 			//System.out.println("I am at "+rc.getLocation()+", trail "+snailTrail.get(0)+snailTrail.get(1)+snailTrail.get(2));
 		}
+	} */
+	
+	public static void tryToMove(Direction chosenDirection,boolean selfAvoiding,RobotController rc, int[] directionalLooks, Direction[] allDirections) throws GameActionException{
+		while(snailTrail.size()<2)
+			snailTrail.add(new MapLocation(-1,-1));
+		if(rc.isActive()){
+			//snail trail stays constant at length 2
+			snailTrail.remove(0);
+			snailTrail.add(rc.getLocation());
+			//propose action, check if on trail
+			for(int directionalOffset:directionalLooks){
+				int forwardInt = chosenDirection.ordinal();
+				Direction trialDir = allDirections[(forwardInt+directionalOffset+8)%8];
+				if(canMove(trialDir,selfAvoiding,rc)){
+					rc.move(trialDir);
+					//snailTrail.remove(0);
+					//snailTrail.add(rc.getLocation());
+					break;
+				}
+			}
+			//System.out.println("I am at "+rc.getLocation()+", trail "+snailTrail.get(0)+snailTrail.get(1)+snailTrail.get(2));
+		}
 	}
+	
 	
 }

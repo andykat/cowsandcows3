@@ -3,7 +3,6 @@ package team164;
 import java.util.ArrayList;
 import java.util.Random;
 
-
 import battlecode.common.*;
 
 public class pastureExterminator {
@@ -11,7 +10,8 @@ public class pastureExterminator {
 	static Random randall = new Random();
 	static ArrayList<MapLocation> path;
 	static int bigBoxSize = 5;
-	static Direction allDirections[] = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
+	//static Direction allDirections[] = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
+	static Direction allDirections[] = Direction.values();
 	static int directionalLooks[] = new int[]{0,1,-1,2,-2,3,-3,4};
 	
 	public static void run(RobotController rc) throws GameActionException {
@@ -73,7 +73,7 @@ public class pastureExterminator {
 		 */
 		//BreadthFirst.init(rc, bigBoxSize);
 		MapLocation goal = getRandomLocation(rc);
-		//path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
+		path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
 		
 		if (rc.isActive())
 		{
@@ -97,10 +97,17 @@ public class pastureExterminator {
 			else
 				if (rc.sensePastrLocations(rc.getTeam().opponent()).length> 0) {
 					//short range pathfinding simpleMove
+					//locationServices.simpleMove(rc, rc.sensePastrLocations(rc.getTeam().opponent())[0]);
 					goal = rc.sensePastrLocations(rc.getTeam().opponent())[0];
-					locationServices.simpleMove(rc, rc.sensePastrLocations(rc.getTeam().opponent())[0]);
-					//path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
 					
+					if (path.size() != 0 && !path.get(path.size()-1).equals(VectorFunctions.mldivide(goal,bigBoxSize))){
+						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
+						//System.out.println("recalculate");
+					}
+					if(path.size()==0){
+						goal = getRandomLocation(rc);
+						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(rc.senseEnemyHQLocation(),bigBoxSize), 100000);
+					}
 				} else {
 					//if(path.size()==0){
 						//goal = getRandomLocation(rc);
@@ -213,7 +220,7 @@ public class pastureExterminator {
 			
 			//Now chose one to move randomly in
 			Direction chosen= possDir.get(randall.nextInt(possDir.size()));
-			locationServices.tryToMove(chosen, false, rc); //Or adjust to better move algorithm, so the guy doesn't get sandwiched
+			locationServices.tryToMove(chosen, false, rc, directionalLooks, allDirections); //Or adjust to better move algorithm, so the guy doesn't get sandwiched
 		}
 	}
 	

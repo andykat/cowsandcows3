@@ -10,6 +10,7 @@ public class RobotPlayer{
 	public static RobotController rc;
 	static Random randall = new Random();
 	static int directionalLooks[] = new int[]{0,1,-1,2,-2};
+	static Direction allDirections[] = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
 	static int enemeyPastureIterate;
 	static int bigBoxSize = 5;
 	static ArrayList<MapLocation> path;
@@ -39,6 +40,13 @@ public class RobotPlayer{
 	}
 	
 	public static void runPastureExterminator(RobotController rc) throws GameActionException {
+		
+		/*
+		 *Moving pastureExterminator.java contents here - wasn't working otherwise.
+		 *I have yet to find a workaround with the run method in a separate file that
+		 *avoids absolute bytecode screwage by recomputing the map each time 
+		 */
+		
 		/*
 		 * Channel:
 		 * 
@@ -124,13 +132,12 @@ public class RobotPlayer{
 					//locationServices.simpleMove(rc, rc.sensePastrLocations(rc.getTeam().opponent())[0]);
 					MapLocation goal = rc.sensePastrLocations(rc.getTeam().opponent())[0];
 					
-					//This part is not working - gets called all the time
 					if (path.size() != 0 && !path.get(path.size()-1).equals(VectorFunctions.mldivide(goal,bigBoxSize))){
 						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
-						System.out.println("recalculate");
+						//System.out.println("recalculate");
 					}
 					if(path.size()==0){
-						//goal = getRandomLocation();
+						goal = getRandomLocation();
 						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(rc.senseEnemyHQLocation(),bigBoxSize), 100000);
 					}
 				} else {
@@ -141,7 +148,7 @@ public class RobotPlayer{
 				}
 				//follow breadthFirst path
 				Direction bdir = BreadthFirst.getNextDirection(path, bigBoxSize);
-				locationServices.tryToMove(bdir, true, rc);//, directionalLooks, allDirections);
+				locationServices.tryToMove(bdir, true, rc, directionalLooks, allDirections);
 				}
 			
 		}
@@ -246,7 +253,7 @@ public class RobotPlayer{
 			
 			//Now chose one to move randomly in
 			Direction chosen= possDir.get(randall.nextInt(possDir.size()));
-			locationServices.tryToMove(chosen, false, rc); //Or adjust to better move algorithm, so the guy doesn't get sandwiched
+			locationServices.tryToMove(chosen, false, rc, directionalLooks, allDirections); //Or adjust to better move algorithm, so the guy doesn't get sandwiched
 		}
 	}
 	
