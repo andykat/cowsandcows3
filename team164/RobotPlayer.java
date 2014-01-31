@@ -5,6 +5,9 @@ import battlecode.common.*;
 import java.util.ArrayList;
 import java.util.Random;
 
+//import coarsenserPlayer.BreadthFirst;
+//import coarsenserPlayer.VectorFunctions;
+
 public class RobotPlayer{
 	
 	public static RobotController rc;
@@ -20,10 +23,23 @@ public class RobotPlayer{
 		rc = rcin;
 		randall.setSeed(rc.getRobot().getID());
 		
+		if(rc.getType()==RobotType.HQ){
+			try {
+			hq.run(rc);
+			} catch (GameActionException g) {
+				System.out.println("initial hq derp");
+			}
+		}else{
+			BreadthFirst.init(rc, bigBoxSize);
+			MapLocation goal = getRandomLocation();
+			path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
+			//VectorFunctions.printPath(path,bigBoxSize);
+		}
+		/*
 		BreadthFirst.init(rc, bigBoxSize);
 		MapLocation goal = getRandomLocation();
 		path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
-		
+		*/
 		while(true){
 			try{
 				if(rc.getType()==RobotType.HQ){//if I'm a headquarters
@@ -32,10 +48,10 @@ public class RobotPlayer{
 					//pastureExterminator.run(rc);
 					runPastureExterminator(rc);
 				}
-				rc.yield();
 			}catch (Exception e){
 				e.printStackTrace();
 			}
+			rc.yield();
 		}
 	}
 	
@@ -103,9 +119,6 @@ public class RobotPlayer{
 								find closest enemy, attack it, and broadcast to respective team attack channel
 						else evade 
 		 */
-		//BreadthFirst.init(rc, bigBoxSize);
-		//MapLocation goal = getRandomLocation();
-		//path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
 		
 		if (rc.isActive())
 		{
@@ -126,29 +139,38 @@ public class RobotPlayer{
 				else
 					evade(rc);
 			}
-			else {
+			else { //if not active
+				//if there are enemy pastures
 				if (rc.sensePastrLocations(rc.getTeam().opponent()).length> 0) {
 					//short range pathfinding simpleMove
 					//locationServices.simpleMove(rc, rc.sensePastrLocations(rc.getTeam().opponent())[0]);
 					MapLocation goal = rc.sensePastrLocations(rc.getTeam().opponent())[0];
-					
+					//if you have a path and the path is not to the targeted pasture
 					if (path.size() != 0 && !path.get(path.size()-1).equals(VectorFunctions.mldivide(goal,bigBoxSize))){
 						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
 						//System.out.println("recalculate");
+						//go after that pasture
 					}
+					//if at destination
 					if(path.size()==0){
+						//go somewhere random
 						goal = getRandomLocation();
 						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(rc.senseEnemyHQLocation(),bigBoxSize), 100000);
 					}
-				} else {
+					Direction bdir = BreadthFirst.getNextDirection(path, bigBoxSize);
+					locationServices.tryToMove(bdir, true, rc, directionalLooks, allDirections);
+				} else { //if there are no enemy pastures
 					if(path.size()==0){
 						MapLocation goal = getRandomLocation();
-						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(rc.senseEnemyHQLocation(),bigBoxSize), 100000);
+						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
 					}
+					Direction bdir = BreadthFirst.getNextDirection(path, bigBoxSize);
+					locationServices.tryToMove(bdir, true, rc, directionalLooks, allDirections);
 				}
 				//follow breadthFirst path
-				Direction bdir = BreadthFirst.getNextDirection(path, bigBoxSize);
-				locationServices.tryToMove(bdir, true, rc, directionalLooks, allDirections);
+				//getting array index out of bounds here
+				//Direction bdir = BreadthFirst.getNextDirection(path, bigBoxSize);
+				//locationServices.tryToMove(bdir, true, rc, directionalLooks, allDirections);
 				}
 			
 		}
