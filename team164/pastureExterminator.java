@@ -17,6 +17,7 @@ public class pastureExterminator {
 	
 	public pastureExterminator(RobotController rcIn) {
 		rc = rcIn;
+		//initialize
 		BreadthFirst.init(rc, bigBoxSize);
 		MapLocation goal = getRandomLocation(rc);
 		path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
