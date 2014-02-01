@@ -13,6 +13,14 @@ public class pastureExterminator {
 	//static Direction allDirections[] = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST, Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
 	static Direction allDirections[] = Direction.values();
 	static int directionalLooks[] = new int[]{0,1,-1,2,-2,3,-3,4};
+	public static RobotController rc;
+	
+	public pastureExterminator(RobotController rcIn) {
+		rc = rcIn;
+		BreadthFirst.init(rc, bigBoxSize);
+		MapLocation goal = getRandomLocation(rc);
+		path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
+	}
 	
 	public static void run(RobotController rc) throws GameActionException {
 		/*
@@ -94,30 +102,37 @@ public class pastureExterminator {
 				else
 					evade(rc);
 			}
-			else
+			else { 
 				if (rc.sensePastrLocations(rc.getTeam().opponent()).length> 0) {
 					//short range pathfinding simpleMove
 					//locationServices.simpleMove(rc, rc.sensePastrLocations(rc.getTeam().opponent())[0]);
 					goal = rc.sensePastrLocations(rc.getTeam().opponent())[0];
-					
+					//if you have a path and the path is not to the targeted pasture
 					if (path.size() != 0 && !path.get(path.size()-1).equals(VectorFunctions.mldivide(goal,bigBoxSize))){
 						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
-						//System.out.println("recalculate");
 					}
+					//if at destination
 					if(path.size()==0){
+						//go somewhere random
 						goal = getRandomLocation(rc);
 						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(rc.senseEnemyHQLocation(),bigBoxSize), 100000);
 					}
-				} else {
-					//if(path.size()==0){
-						//goal = getRandomLocation(rc);
-						//path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(rc.senseEnemyHQLocation(),bigBoxSize), 100000);
-					//}
-
+					Direction bdir = BreadthFirst.getNextDirection(path, bigBoxSize);
+					BasicPathing.tryToMove(bdir, true, rc, directionalLooks, allDirections);
+				} else { //if there are no enemy pastures
+					if(path.size()==0){
+						goal = getRandomLocation(rc);
+						path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
+					}
+					Direction bdir = BreadthFirst.getNextDirection(path, bigBoxSize);
+					BasicPathing.tryToMove(bdir, true, rc, directionalLooks, allDirections);
 				}
-			//follow breadthFirst path
-			//Direction bdir = BreadthFirst.getNextDirection(path, bigBoxSize);
-			//locationServices.tryToMove(bdir, true, rc);//, directionalLooks, allDirections);
+				//follow breadthFirst path
+				//getting array index out of bounds here
+				//Direction bdir = BreadthFirst.getNextDirection(path, bigBoxSize);
+				//locationServices.tryToMove(bdir, true, rc, directionalLooks, allDirections);
+				}
+			
 		}
 	}
 	
