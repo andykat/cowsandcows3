@@ -26,7 +26,7 @@ public class hq {
 		//Look at surrounding for can move location
 		Direction spawnDir= allDirections[0];
 		rc.broadcast(1, -1);//clear
-		for (int x= 1; x< allDirections.length; x++){
+		for (int x= 1; x<8; x++){
 			if (rc.canMove(allDirections[x])){
 				spawnDir= allDirections[x];
 				break;

@@ -83,8 +83,8 @@ public class pastureExterminator {
 					if (channelZInfo== -1)
 						attackRandomNearByEnemies(rc);
 					else{
-						if (rc.canAttackSquare(locationServices.intToLoc(channelZInfo))){
-							rc.attackSquare(locationServices.intToLoc(channelZInfo));
+						if (rc.canAttackSquare(VectorFunctions.intToLoc(channelZInfo))){
+							rc.attackSquare(VectorFunctions.intToLoc(channelZInfo));
 						}
 						else{
 							attackRandomNearByEnemies(rc);
@@ -174,7 +174,7 @@ public class pastureExterminator {
 				MapLocation target= bombSite.get(randall.nextInt(bombSite.size()));
 				rc.attackSquare(target);
 				if (rc.senseObjectAtLocation(target).getTeam()== rc.getTeam().opponent())
-					rc.broadcast(0, locationServices.locToInt(target));
+					rc.broadcast(0, VectorFunctions.locToInt(target));
 				else
 					rc.broadcast(0, -1);
 			}
@@ -220,7 +220,7 @@ public class pastureExterminator {
 			
 			//Now chose one to move randomly in
 			Direction chosen= possDir.get(randall.nextInt(possDir.size()));
-			locationServices.tryToMove(chosen, false, rc, directionalLooks, allDirections); //Or adjust to better move algorithm, so the guy doesn't get sandwiched
+			BasicPathing.tryToMove(chosen, false, rc, directionalLooks, allDirections); //Or adjust to better move algorithm, so the guy doesn't get sandwiched
 		}
 	}
 	
@@ -229,7 +229,7 @@ public class pastureExterminator {
 		boolean answer= false;
 		MapLocation[] enemyPastureLoc= rc.sensePastrLocations(rc.getTeam().opponent());
 		for (int x= 0; x< enemyPastureLoc.length; x++){
-			if (locationServices.intToLoc(loc)== enemyPastureLoc[x]){
+			if (VectorFunctions.intToLoc(loc)== enemyPastureLoc[x]){
 				answer= true;
 				break;
 			}
@@ -242,7 +242,7 @@ public class pastureExterminator {
 		boolean answer= false;
 		MapLocation[] ownPastureLoc= rc.sensePastrLocations(rc.getTeam());
 		for (int x= 0; x< ownPastureLoc.length; x++){
-			if (locationServices.intToLoc(loc)== ownPastureLoc[x]){
+			if (VectorFunctions.intToLoc(loc)== ownPastureLoc[x]){
 				answer= true;
 				break;
 			}
