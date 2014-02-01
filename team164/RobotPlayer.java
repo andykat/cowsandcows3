@@ -28,24 +28,26 @@ public class RobotPlayer{
 				System.out.println("initial hq derp");
 			}
 		}else{
-			BreadthFirst.init(rc, bigBoxSize);
-			MapLocation goal = getRandomLocation();
-			path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
+			//BreadthFirst.init(rc, bigBoxSize);
+			//MapLocation goal = getRandomLocation();
+			//path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
 			//VectorFunctions.printPath(path,bigBoxSize);
 		}
-		/*
-		BreadthFirst.init(rc, bigBoxSize);
-		MapLocation goal = getRandomLocation();
-		path = BreadthFirst.pathTo(VectorFunctions.mldivide(rc.getLocation(),bigBoxSize), VectorFunctions.mldivide(goal,bigBoxSize), 100000);
-		*/
+		
+		
 		while(true){
 			try{
 				if(rc.getType()==RobotType.HQ){//if I'm a headquarters
 					hq.run(rc);
 					//runHQ();
 				}else if(rc.getType()==RobotType.SOLDIER){
-					//pastureExterminator.run(rc);
-					runPastureExterminator(rc);
+					pastureExterminator PE = new pastureExterminator(rc);
+					for (;;) {
+						PE.run(rc);
+						rc.yield();
+					}
+					
+					//runPastureExterminator(rc);
 					//runSoldier();
 				}
 			}catch (Exception e){

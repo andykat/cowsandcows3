@@ -14,6 +14,8 @@ import java.util.Random;
 public class pastureExterminator
 {
   static Random randall = new Random();
+  static int directionalLooks[] = new int[]{0,1,-1,2,-2,3,-3,4};
+  static Direction[] allDirections = Direction.values();
   
   public static void run(RobotController rc)
     throws GameActionException
@@ -185,7 +187,8 @@ public class pastureExterminator
         }
       }
       Direction chosen = (Direction)possDir.get(randall.nextInt(possDir.size()));
-      locationServices.tryToMove(chosen, false, rc);
+      //TODO changed this to have directionalLooks and allDirections
+      locationServices.tryToMove(chosen, false, rc, directionalLooks, allDirections);
     }
   }
   
