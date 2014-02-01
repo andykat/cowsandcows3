@@ -41,7 +41,8 @@ public class PastureMaker {
 	public static double[] Map_Corners_X = {1.0,1.0,1.0,1.0};
 	public static double[] Map_Corners_Y = {1.0,1.0,1.0,1.0};
 	
-	
+	public static int[][] cowDensity;
+	public static boolean findDenseArea;
 	
 	public PastureMaker(RobotController tRc, int tRType)
 	{
