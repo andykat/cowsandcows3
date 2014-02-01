@@ -48,6 +48,7 @@ public class PastureMaker {
 		rc = tRc;
 		rType = tRType;
 		cornerFails = 0;
+		rVisited = new int[width][height]; //saving visited locations
 		PM_init();
 	}
 	
@@ -60,23 +61,34 @@ public class PastureMaker {
 		{
 			if(rAction.equals("init"))
 			{
+				for(int i=0;i<width;i++)
+				{
+					for(int j=0;j<height;j++)
+					{
+						rVisited[i][j] = -1;
+					}
+				}
 				
-				Map_Corners_X[2] = ((double)width)-2.0;
-				Map_Corners_X[3] = ((double)width)-2.0;
+				Map_Corners_X[1] = 1.0;
 				Map_Corners_Y[1] = ((double)height)-2.0;
+				Map_Corners_X[2] = ((double)width)-2.0;
 				Map_Corners_Y[2] = ((double)height)-2.0;
+				Map_Corners_X[3] = ((double)width)-2.0;
+				Map_Corners_Y[3] = 1.0;
+				Map_Corners_X[0] = 1.0;
+				Map_Corners_Y[0] = 1.0;
 				double min_dist=0;
 				int index=-1;
 				double hqX = (double)rc.senseHQLocation().x;
 				double hqY = (double)rc.senseHQLocation().y;
 				int rx = 0;
 				int ry = 0;
-				int corners = rType/2+1;
-				System.out.println("cornerblah:" + corners);
+				int corners = rType/8+1;
+				System.out.println("cornerfails: " + cornerFails);
 				for(int j=0;j<corners+cornerFails;j++)
 				{
 					index = -1;
-					min_dist=1000000.0;
+					min_dist=20001.0;
 					for(int i=0;i<4;i++)
 					{
 						double cornerdist = (hqX-Map_Corners_X[i])*(hqX-Map_Corners_X[i]) + (hqY-Map_Corners_Y[i])*(hqY-Map_Corners_Y[i]);
@@ -85,6 +97,10 @@ public class PastureMaker {
 							min_dist = cornerdist;
 							index = i;
 						}
+					}
+					if(index==-1)
+					{
+						break;
 					}
 					rx = (int) Map_Corners_X[index];
 					ry = (int) Map_Corners_Y[index];
@@ -101,8 +117,8 @@ public class PastureMaker {
 				{
 					rDestinationX = rx;
 					rDestinationY = ry;
-					System.out.println("mx:" + rDestinationX);
-					System.out.println("my:" + rDestinationY);
+					System.out.println("rx: " + rx + " ry: " + ry);
+
 				}
 				
 				rAction = "moving";
@@ -160,13 +176,18 @@ public class PastureMaker {
 					//found corner
 				
 					//check if pasture is empty
-					MapLocation currentLoc = new MapLocation(rX,rY);
-					if(rc.senseCowsAtLocation(currentLoc)<10.0)
-					{
-						rAction = "init";
-						cornerFails++;
-						return;
-					}
+				MapLocation loc1 = new MapLocation(rX+1,rY);
+				MapLocation loc2 = new MapLocation(rX,rY+1);
+				MapLocation loc3 = new MapLocation(rX-1,rY);
+				MapLocation loc4 = new MapLocation(rX,rY-1);
+				double tCows = rc.senseCowsAtLocation(loc1) + rc.senseCowsAtLocation(loc2) + rc.senseCowsAtLocation(loc3) + rc.senseCowsAtLocation(loc4); 
+				if(tCows<25.0)
+				{
+					rAction = "init";
+					cornerFails++;
+
+					return;
+				}
 				
 					int Ncorners = rc.readBroadcast(3) + 1;
 					rc.broadcast(3, Ncorners);
@@ -197,7 +218,7 @@ public class PastureMaker {
 					{
 						tdirection = 1;
 					}*/
-					System.out.println("direction:" + tdirection);
+
 					rc.broadcast(20+Ncorners, tdirection);
 					
 					rAction = "makePasture";
@@ -251,16 +272,10 @@ public class PastureMaker {
 		double cornerXSum = 0;
 		double cornerYSum = 0;
 		//find closest direction
-		if(rType==1)
-		{
-			if(rX == 2 && rY == 2)	System.out.println("rx: " + rX + " ry: " + rY);
-		}
+
 		for(int i=1;i<9;i++)
 		{
-			if(rType==1)
-			{
-				if(rX == 2 && rY == 2)	System.out.println("conerf:" + cornerFlag);
-			}
+
 			int test_direction = i;
 			if(test_direction%2 == 1)
 			{
@@ -344,10 +359,7 @@ public class PastureMaker {
 			{
 				if(rType_s==1)
 				{
-					if(rType==1)
-					{
-						if(rX == 2 && rY == 2)	System.out.println("dir:" + test_direction);
-					}
+					
 					cornerFlag++;
 					cornerXSum += (double) int_dirs_X[test_direction];
 					cornerYSum += (double) int_dirs_Y[test_direction];
@@ -357,24 +369,28 @@ public class PastureMaker {
 		if(rType_s==1)
 		{
 			//rc.setIndicatorString(0, Integer.toString(cornerFlag));
-			//System.out.println("what");
 			if(cornerFlag>4)
 			{
 				//found corner
 				
 				//check if corner is empty
-				MapLocation currentLoc = new MapLocation(rX,rY);
-				if(rc.senseCowsAtLocation(currentLoc)<10.0)
+				MapLocation loc1 = new MapLocation(rX+1,rY);
+				MapLocation loc2 = new MapLocation(rX,rY+1);
+				MapLocation loc3 = new MapLocation(rX-1,rY);
+				MapLocation loc4 = new MapLocation(rX,rY-1);
+				double tCows = rc.senseCowsAtLocation(loc1) + rc.senseCowsAtLocation(loc2) + rc.senseCowsAtLocation(loc3) + rc.senseCowsAtLocation(loc4); 
+				if(tCows<30.0)
 				{
 					rAction = "init";
 					cornerFails++;
+
 					return;
 				}
 				
 				int Ncorners = rc.readBroadcast(3) + 1;
 				rc.broadcast(3, Ncorners);
 				rc.broadcast(10 + Ncorners, rX*100 + rY);
-				System.out.println("wtf corners:" + Ncorners);
+
 				//find corner direction
 				double tdx = (double)Math.round((cornerXSum/2.0));
 				double tdy = (double)(Math.round(cornerYSum/2.0));
@@ -393,7 +409,7 @@ public class PastureMaker {
 				{
 					tdirection -= 8;
 				}
-				System.out.println("direction:" + tdirection);
+
 				rc.broadcast(20+Ncorners, tdirection);
 				
 				rAction = "makePasture";
