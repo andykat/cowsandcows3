@@ -44,9 +44,10 @@ public class RobotPlayer
 			}
 			else if(rClass.equals("s"))
 			{
+				pastureExterminator PE = new pastureExterminator(rc);
 				for (;;)
 		    	{
-					pastureExterminator.run(rc);
+					PE.run(rc);
 					rc.yield();
 		    	}
 			}
