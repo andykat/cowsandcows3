@@ -41,14 +41,13 @@ public class PastureMaker {
 	public static double[] Map_Corners_X = {1.0,1.0,1.0,1.0};
 	public static double[] Map_Corners_Y = {1.0,1.0,1.0,1.0};
 	
-	public static int[][] cowDensity;
-	public static boolean findDenseArea;
+	public static int cornerFails;
 	
 	public PastureMaker(RobotController tRc, int tRType)
 	{
 		rc = tRc;
 		rType = tRType;
-		
+		cornerFails = 0;
 		PM_init();
 	}
 	
@@ -74,7 +73,7 @@ public class PastureMaker {
 				int ry = 0;
 				int corners = rType/2+1;
 				System.out.println("cornerblah:" + corners);
-				for(int j=0;j<corners;j++)
+				for(int j=0;j<corners+cornerFails;j++)
 				{
 					index = -1;
 					min_dist=1000000.0;
@@ -159,6 +158,16 @@ public class PastureMaker {
 			if(rType_s==1)
 			{
 					//found corner
+				
+					//check if pasture is empty
+					MapLocation currentLoc = new MapLocation(rX,rY);
+					if(rc.senseCowsAtLocation(currentLoc)<10.0)
+					{
+						rAction = "init";
+						cornerFails++;
+						return;
+					}
+				
 					int Ncorners = rc.readBroadcast(3) + 1;
 					rc.broadcast(3, Ncorners);
 					rc.broadcast(10 + Ncorners, rX*100 + rY);
@@ -352,6 +361,16 @@ public class PastureMaker {
 			if(cornerFlag>4)
 			{
 				//found corner
+				
+				//check if corner is empty
+				MapLocation currentLoc = new MapLocation(rX,rY);
+				if(rc.senseCowsAtLocation(currentLoc)<10.0)
+				{
+					rAction = "init";
+					cornerFails++;
+					return;
+				}
+				
 				int Ncorners = rc.readBroadcast(3) + 1;
 				rc.broadcast(3, Ncorners);
 				rc.broadcast(10 + Ncorners, rX*100 + rY);
